@@ -2,7 +2,16 @@
 
 The Extreme Learning Machine (ELM) is a Single Layer FeedForward Neural Network designed by Huang et Al [1]
 
-You can see an Example of how to use it on example.py
+```python
+from ELM import ELMRegressor
+
+elm = ELMRegressor(n_hidden_units=100)
+elm.fit(train_x, train_y)
+
+prediction = elm.predict(test_x)
+```
+
+You can see a more detailed Example of how to use it on example.py
 
 
 
