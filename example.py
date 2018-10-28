@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.datasets import load_diabetes
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
@@ -24,7 +24,8 @@ sns.set_context("talk")
 np.random.seed(0)
 
 ## DATA PREPROCESSING
-X, y = load_diabetes().values()
+diabetes = load_diabetes()
+X, y = diabetes["data"], diabetes["target"]
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2)
 
 stdScaler_data = StandardScaler()
@@ -32,8 +33,8 @@ X_train = stdScaler_data.fit_transform(X_train)
 X_test = stdScaler_data.transform(X_test)
 
 stdScaler_target = StandardScaler()
-y_train = stdScaler_target.fit_transform(y_train)  # /max(y_train)
-y_test = stdScaler_target.transform(y_test)  # /max(y_train)
+y_train = stdScaler_target.fit_transform(np.expand_dims(y_train,1))  # /max(y_train)
+y_test = stdScaler_target.transform(np.expand_dims(y_test,1))  # /max(y_train)
 max_y_train = max(abs(y_train))
 y_train = y_train / max_y_train
 y_test = y_test / max_y_train
@@ -59,7 +60,7 @@ for M in range(1, 200, 1):
     MAE_TEST_MINS.append(min(MAES_TEST))
     MAE_TRAIN_MINS.append(MAES_TRAIN[np.argmin(MAES_TEST)])
 
-print "Minimum MAE ELM =", min(MAE_TEST_MINS)
+print("Minimum MAE ELM =", min(MAE_TEST_MINS))
 test_maes_dictionary["ELM"] = min(MAE_TEST_MINS)
 
 ## LINEAR REGRESSION TRAINING
@@ -68,7 +69,7 @@ lr = LinearRegression()
 lr.fit(X_train, y_train)
 prediction = lr.predict(X_test)
 mae.append(mean_absolute_error(y_test, prediction))
-print "Minimum MAE LR =", min(mae)
+print("Minimum MAE LR =", min(mae))
 test_maes_dictionary["LinReg"] = min(mae)
 
 ## K-NEAREST NEIGHBORS TRAINING
@@ -78,18 +79,18 @@ for N in range(1, 51):
     kn.fit(X_train, y_train)
     prediction = kn.predict(X_test)
     mae.append(mean_absolute_error(y_test, prediction))
-print "Minimum MAE KNN =", min(mae)
+print("Minimum MAE KNN =", min(mae))
 test_maes_dictionary["KNN"] = min(mae)
 
 ## DECISION TREES TRAINING
 mae = []
 for max_depth in range(1, 51):
-    for min_samples_split in range(1, 102, 5):
+    for min_samples_split in range(5, 102, 5):
         tree = DecisionTreeRegressor(max_depth=max_depth, min_samples_split=min_samples_split)
         tree.fit(X_train, y_train)
         prediction = tree.predict(X_test)
         mae.append(mean_absolute_error(y_test, prediction))
-print "Minimum MAE TREE = ", min(mae)
+print("Minimum MAE TREE = ", min(mae))
 test_maes_dictionary["Dec. Tree"] = min(mae)
 
 ## SUPPORT VECTORS MACHINE TRAINING
@@ -99,7 +100,7 @@ for kernel in ["rbf", "linear", "poly", "sigmoid"]:
     svr.fit(X_train, y_train)
     prediction = svr.predict(X_test)
     mae.append(mean_absolute_error(y_test, prediction))
-print "Minimum MAE SVR = ", min(mae)
+print("Minimum MAE SVR = ", min(mae))
 test_maes_dictionary["SVM"] = min(mae)
 
 ## RANDOM FOREST TRAINING
@@ -109,7 +110,7 @@ for n_estimators in range(10, 1100, 100):
     rf.fit(X_train, y_train)
     prediction = rf.predict(X_test)
     mae.append(mean_absolute_error(y_test, prediction))
-print "Minimum MAE R.Forest = ", min(mae)
+print("Minimum MAE R.Forest = ", min(mae))
 test_maes_dictionary["R. Forest"] = min(mae)
 
 #############################################################################################
@@ -117,7 +118,8 @@ test_maes_dictionary["R. Forest"] = min(mae)
 df = pd.DataFrame()
 df["test"] = MAE_TEST_MINS
 df["train"] = MAE_TRAIN_MINS
-ax = df.plot()
+
+ax = df.plot(figsize=(16, 7))
 ax.set_xlabel("Number of Neurons in the hidden layer")
 ax.set_ylabel("Mean Absolute Error")
 ax.set_title(
@@ -125,6 +127,7 @@ ax.set_title(
     "hidden layer (min. at 23 neurons)")
 plt.show()
 
+plt.figure(figsize=(16, 7))
 D = test_maes_dictionary
 plt.bar(range(len(D)), D.values(), align='center')
 plt.xticks(range(len(D)), D.keys())
