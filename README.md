@@ -7,6 +7,8 @@ The Extreme Learning Machine (ELM) is a Single Layer FeedForward Neural Network 
 
 The aim of this repository is to show how easy it is to program this algorithm and make it work with a real dataset.
 
+![ELM_results](img/ELM_dynamics.png)
+![Algorithms comparison](img/algorithms_comparison.png)
 ## Installation
 Just clone the repository and make sure you havbe `numpy` installed. 
 
